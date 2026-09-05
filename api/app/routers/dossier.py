@@ -10,7 +10,6 @@ from api.app.models.records import AttributionRunRow
 from api.app.models.records import Scene as SceneRow
 from api.app.schemas.requests import DossierRequest
 from core.ais.gfw import GfwClient
-from core.dossier.builder import render
 
 router = APIRouter()
 
@@ -18,6 +17,8 @@ _CACHE: dict[str, Any] = {}
 
 
 def _load(run_id: str, mmsi: str, observer: str) -> Any:
+    from core.dossier.builder import render
+
     key = f"{run_id}:{mmsi}"
     if key in _CACHE:
         return _CACHE[key]

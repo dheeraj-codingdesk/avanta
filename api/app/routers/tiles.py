@@ -11,13 +11,11 @@ from __future__ import annotations
 
 import io
 
-import numpy as np
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
 
 from api.app.db import SessionLocal
 from api.app.models.records import Scene as SceneRow
-from core.sar.preprocess import read_scene
 
 router = APIRouter()
 
@@ -26,6 +24,9 @@ _CACHE: dict[str, bytes] = {}
 
 @router.get("/scenes/{scene_id}/raster.png")
 def raster_png(scene_id: str, vmin: float = -22.0, vmax: float = -4.0) -> Response:
+    import numpy as np
+    from core.sar.preprocess import read_scene
+
     key = f"{scene_id}:{vmin}:{vmax}"
     if key in _CACHE:
         return Response(_CACHE[key], media_type="image/png")
