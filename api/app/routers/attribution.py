@@ -12,7 +12,6 @@ from api.app.models.records import AttributionRunRow, CandidateSet
 from api.app.models.records import Scene as SceneRow
 from api.app.routers.candidates import resolve_tracks
 from api.app.schemas.requests import AttributionRequest
-from core.pipeline import attribute
 
 router = APIRouter()
 
@@ -52,6 +51,8 @@ def run(request: AttributionRequest) -> dict[str, Any]:
     wanted = request.candidate_ids or kept_ids
 
     def work(handle: jobs.JobHandle) -> dict[str, Any]:
+        from core.pipeline import attribute
+
         handle.update(stage="resolving candidate tracks", progress=0.02)
         tracks, record = resolve_tracks(bundle, scenario_id, "auto")
         dark_tracks = []

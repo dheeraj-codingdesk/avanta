@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter
@@ -9,7 +10,6 @@ from sqlalchemy import text
 from api.app import state
 from api.app.db import SessionLocal
 from core.config import config_sha, settings
-from core.pipeline import segmenter_name
 from core.provenance.hashing import git_sha
 
 router = APIRouter()
@@ -44,7 +44,16 @@ def health() -> dict[str, Any]:
         "status": "UP" if state.collector.connected else ("CONFIGURED" if state.collector.configured else "NOT_CONFIGURED"),
         **state.collector.status(),
     }
-    deps["model"] = {"segmenter": segmenter_name(), "trained_checkpoint": "models/segmenter.pt not present"}
+    # Importing the full geospatial pipeline just to name the segmenter adds a
+    # large, unnecessary startup cost to every API process.
+    deps["model"] = {
+        "segmenter": (
+            "attention-unet (checkpoint loaded)"
+            if Path("models/segmenter.pt").exists()
+            else "classical detector (no trained checkpoint loaded)"
+        ),
+        "trained_checkpoint": "models/segmenter.pt not present",
+    }
 
     return {
         "status": "ok" if deps["db"]["status"] == "UP" else "degraded",

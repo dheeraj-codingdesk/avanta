@@ -13,7 +13,10 @@ from api.app.models.records import Scene as SceneRow
 from api.app.schemas.requests import CandidatesRequest
 from core import scenarios as scenario_module
 from core.config import REPO_ROOT
-from core.pipeline import SceneBundle, generate_candidates, load_ais_fixture
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.pipeline import SceneBundle
 from core.provenance.record import SourceRecord
 
 router = APIRouter()
@@ -75,6 +78,8 @@ def resolve_tracks(bundle: SceneBundle, scenario_id: str | None, source: str) ->
             "No live AIS in this box and no bundled AIS fixture. "
             "Run scripts/capture_ais.py to record one.",
         )
+    from core.pipeline import load_ais_fixture
+
     return load_ais_fixture(fixture_path, bundle.scene.bbox)
 
 
@@ -92,6 +97,8 @@ def generate(request: CandidatesRequest) -> dict[str, Any]:
         scenario_id = row.scenario if row else None
 
     def work(handle: jobs.JobHandle) -> dict[str, Any]:
+        from core.pipeline import generate_candidates
+
         handle.update(stage="resolving AIS source", progress=0.1)
         tracks, record = resolve_tracks(bundle, scenario_id, request.source)
         handle.update(

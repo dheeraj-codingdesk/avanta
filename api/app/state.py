@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 from core.ais.stream import AisCollector
-from core.pipeline import SceneBundle
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.pipeline import SceneBundle
 
 collector = AisCollector()
 

@@ -12,7 +12,6 @@ from api.app.db import SessionLocal
 from api.app.models.records import Scene as SceneRow
 from api.app.schemas.requests import IngestRequest
 from core import scenarios as scenario_module
-from core.pipeline import ingest_scene, ingest_synthetic
 from core.sar.ingest import CdseClient
 
 router = APIRouter()
@@ -70,6 +69,8 @@ def ingest(request: IngestRequest) -> dict[str, Any]:
     is_synthetic = bool(scenario and scenario.kind == "synthetic")
 
     def work(handle: jobs.JobHandle) -> dict[str, Any]:
+        from core.pipeline import ingest_scene, ingest_synthetic
+
         def progress(stage: str, fraction: float) -> None:
             handle.update(stage=stage, progress=fraction, log_line=stage)
 
